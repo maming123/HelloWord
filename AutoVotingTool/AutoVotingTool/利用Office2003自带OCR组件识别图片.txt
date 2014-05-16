@@ -1,0 +1,28 @@
+Option Explicit
+'==========================================================================================================
+'功能:利用Office2003自带OCR组件识别图片
+'用法:msgbox OfficeOCRShibie("C:\a.jpg",True)  'True为简体中文False为英文
+'Microsoft Office Document Imaging 11.0 Type Library必须存在,即安装了Office2003
+'==========================================================================================================
+Public Function OfficeOCRShibie(ByVal strPicPath As String, ByVal strEnglishChinese As Boolean) As String
+    Dim strLayoutInfo As String, strLPN As String, lLng As Long
+    Dim miDoc As Object
+    On Error GoTo ErrHandle
+     '初始化并加载文档
+    Set miDoc = CreateObject("MODI.Document")            '创建对象
+    miDoc.Create strPicPath                      '加载图片文件
+    Screen.MousePointer = vbHourglass                    '设置光标忙
+    If strEnglishChinese = True Then
+        lLng = 2052                         '中文简体
+    Else
+        lLng = 9                                '英文
+    End If
+    '识别
+    Err.Clear
+    miDoc.Images(0).OCR lLng, True, True        '有用的就此一句
+    OfficeOCRShibie = miDoc.Images(0).Layout.Text              '读出数据
+ErrHandle:
+    If Err.Description = "EP_E_DCOM_OCR_FAILRECOG" Then MsgBox "识别失败.", vbOKOnly Or vbInformation
+    Set miDoc = Nothing
+    Screen.MousePointer = vbDefault
+End Function
